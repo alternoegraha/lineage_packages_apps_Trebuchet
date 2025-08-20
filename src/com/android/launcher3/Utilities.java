@@ -27,7 +27,6 @@ import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_MA
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.contextualsearch.ContextualSearchManager;
 import android.app.Person;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -56,7 +55,6 @@ import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.TransactionTooLargeException;
-import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -987,26 +985,6 @@ public final class Utilities {
 
     public static boolean isWorkspaceEditAllowed(Context context) {
         return !LauncherPrefs.WORKSPACE_LOCK.get(context);
-    }
-
-    public static boolean startContextualSearch(Context context, int entrypoint) {
-        Context appContext = context.getApplicationContext();
-        ContextualSearchManager contextualSearchManager = 
-            (ContextualSearchManager) appContext.getSystemService(Context.CONTEXTUAL_SEARCH_SERVICE);
-        if (contextualSearchManager == null || !isLongPressSearchEnabled(context)) {
-            return false;
-        }
-        try {
-            contextualSearchManager.startContextualSearch(entrypoint);
-            return true;
-        } catch (Exception e) {}
-        return false;
-    }
-    
-    public static boolean isLongPressSearchEnabled(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED, 1)
-                == 1;
     }
 
     public static boolean canZoomWallpaper(Context context) {
