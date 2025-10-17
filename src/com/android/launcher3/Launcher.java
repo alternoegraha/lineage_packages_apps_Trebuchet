@@ -230,6 +230,7 @@ import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.touch.AllAppsSwipeController;
 import com.android.launcher3.touch.ItemClickHandler;
 import com.android.launcher3.touch.ItemLongClickListener;
+import com.android.launcher3.util.AxCpuBindController;
 import com.android.launcher3.util.ActivityResultInfo;
 import com.android.launcher3.util.BackPressHandler;
 import com.android.launcher3.util.CannedAnimationCoordinator;
@@ -240,6 +241,7 @@ import com.android.launcher3.util.IntSet;
 import com.android.launcher3.util.ItemInflater;
 import com.android.launcher3.util.KeyboardShortcutsDelegate;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
+import com.android.launcher3.util.LauncherStatesHelper;
 import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.PackageUserKey;
@@ -521,6 +523,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         super.onCreate(savedInstanceState);
         setWallpaperDependentTheme(this);
         NTAppLockerHelper.init(this);
+        LauncherStatesHelper.setLauncher(this);
 
         LauncherAppState app = LauncherAppState.getInstance(this);
         mModel = app.getModel();
@@ -1318,6 +1321,8 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         DragView.removeAllViews(this);
         TraceHelper.INSTANCE.endSection();
+        
+        LauncherStatesHelper.setActivityResumed(true);
     }
 
     @Override
@@ -1334,6 +1339,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             mOverlayManager.onActivityPaused();
         }
         mAppWidgetHolder.setActivityResumed(false);
+        
+        LauncherStatesHelper.setActivityResumed(false);
     }
 
     /**
@@ -2840,7 +2847,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     /** Resumes view updates at the end of the app launch animation. */
     public void resumeExpensiveViewUpdates() {
-        getWorkspace().getPageIndicator().skipAnimationsToEnd();
 
         getWorkspace().mapOverItems((info, view) -> {
             if (view instanceof LauncherAppWidgetHostView) {
@@ -2848,6 +2854,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             }
             return false; // Return false to continue iterating through all the items.
         });
+        AxCpuBindController.get().releaseAppOpenBoost();
     }
 
     /**
